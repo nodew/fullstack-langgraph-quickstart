@@ -4,6 +4,7 @@ interface WelcomeScreenProps {
   handleSubmit: (
     submittedInputValue: string,
     effort: string,
+    provider: string,
     model: string
   ) => void;
   onCancel: () => void;

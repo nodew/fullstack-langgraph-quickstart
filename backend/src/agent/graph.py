@@ -60,14 +60,17 @@ def generate_query(state: OverallState, config: RunnableConfig) -> QueryGenerati
     """
     configurable = Configuration.from_runnable_config(config)
 
+    provider = state.get("provider") or configurable.provider
+    reasoning_model = state.get("reasoning_model") or configurable.reasoning_model
+
     # check for custom initial search query count
     if state.get("initial_search_query_count") is None:
         state["initial_search_query_count"] = configurable.number_of_initial_queries
 
     # init query generator model
     llm = get_llm(
-        model_name=configurable.query_generator_model,
-        provider=configurable.query_generator_provider,
+        model_name=reasoning_model,
+        provider=provider,
         temperature=1.0,
         max_retries=2,
     )
@@ -110,7 +113,9 @@ def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
         Dictionary with state update, including sources_gathered, search_query, and web_research_result
     """
     configurable = Configuration.from_runnable_config(config)
-    
+    provider = state.get("provider") or configurable.provider
+    reasoning_model = state.get("reasoning_model") or configurable.reasoning_model
+
     # Check if we can use Google's native search
     if genai_client is not None:
         # Use Google's native search with grounding metadata
@@ -129,7 +134,7 @@ def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
                     "temperature": 0,
                 },
             )
-            
+
             # Process Google search results with grounding metadata
             resolved_urls = resolve_urls(
                 response.candidates[0].grounding_metadata.grounding_chunks, state["id"]
@@ -143,22 +148,22 @@ def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
                 "search_query": [state["search_query"]],
                 "web_research_result": [modified_text],
             }
-            
+
         except Exception as e:
             print(f"⚠️ Google native search failed ({e}), falling back to custom search")
             # Fall through to custom search implementation
-    
+
     # Fallback to custom DuckDuckGo search implementation
     print(f"🔍 Using custom DuckDuckGo search for: {state['search_query']}")
-    
+
     # Get the appropriate LLM for web research processing
     llm = get_llm(
-        model_name=configurable.query_generator_model,
-        provider=configurable.query_generator_provider,
+        model_name=reasoning_model,
+        provider=provider,
         temperature=0,
         max_retries=2,
     )
-    
+
     # Perform web search with the generic approach
     search_results = perform_web_search_with_llm(
         search_query=state["search_query"],
@@ -166,7 +171,7 @@ def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
         search_prompt_template=generic_web_search_instructions,
         max_results=5
     )
-    
+
     return {
         "sources_gathered": search_results["sources_gathered"],
         "search_query": [search_results["search_query"]],
@@ -191,6 +196,7 @@ def reflection(state: OverallState, config: RunnableConfig) -> ReflectionState:
     configurable = Configuration.from_runnable_config(config)
     # Increment the research loop count and get the reasoning model
     state["research_loop_count"] = state.get("research_loop_count", 0) + 1
+    provider = state.get("provider") or configurable.provider
     reasoning_model = state.get("reasoning_model") or configurable.reasoning_model
 
     # Format the prompt
@@ -203,7 +209,7 @@ def reflection(state: OverallState, config: RunnableConfig) -> ReflectionState:
     # init reflection model
     llm = get_llm(
         model_name=reasoning_model,
-        provider=configurable.reflection_provider,
+        provider=provider,
         temperature=1.0,
         max_retries=2,
     )
@@ -269,6 +275,7 @@ def finalize_answer(state: OverallState, config: RunnableConfig):
         Dictionary with state update, including running_summary key containing the formatted final summary with sources
     """
     configurable = Configuration.from_runnable_config(config)
+    provider = state.get("provider") or configurable.provider
     reasoning_model = state.get("reasoning_model") or configurable.reasoning_model
 
     # Format the prompt
@@ -281,8 +288,8 @@ def finalize_answer(state: OverallState, config: RunnableConfig):
 
     # init answer model
     llm = get_llm(
-        model_name=configurable.answer_model,
-        provider=configurable.answer_provider,
+        model_name=reasoning_model,
+        provider=provider,
         temperature=0,
         max_retries=2,
     )
@@ -291,7 +298,7 @@ def finalize_answer(state: OverallState, config: RunnableConfig):
     # Process sources for the final output - handle both Google grounding and custom formats
     unique_sources = []
     seen_urls = set()
-    
+
     for source in state["sources_gathered"]:
         # Handle both Google grounding format and custom format
         if isinstance(source, dict):
@@ -301,7 +308,7 @@ def finalize_answer(state: OverallState, config: RunnableConfig):
                 if url not in seen_urls:
                     seen_urls.add(url)
                     unique_sources.append(source)
-            # Google grounding format: {"label", "short_url", "value"}  
+            # Google grounding format: {"label", "short_url", "value"}
             elif "value" in source:
                 url = source["value"]
                 if url not in seen_urls:

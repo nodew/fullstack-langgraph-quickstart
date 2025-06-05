@@ -11,7 +11,7 @@ from agent.models import get_supported_models
 # Define the FastAPI app
 app = FastAPI()
 
-@app.get("/api/models")
+@app.get("/api/providers")
 async def get_available_models() -> List[Dict[str, Any]]:
     """
     Get available LLM models based on environment configuration.
@@ -19,31 +19,31 @@ async def get_available_models() -> List[Dict[str, Any]]:
     """
     available_providers = []
     supported_models = get_supported_models()
-    
+
     # Check which providers have API keys configured
     provider_env_vars = {
         "gemini": "GEMINI_API_KEY",
-        "openai": "OPENAI_API_KEY", 
+        "openai": "OPENAI_API_KEY",
         "anthropic": "ANTHROPIC_API_KEY",
         "azure_openai": ["AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_API_KEY"]
     }
-    
+
     for provider, env_vars in provider_env_vars.items():
         if isinstance(env_vars, list):
             # For Azure OpenAI, check that both endpoint and API key are set
             if all(os.getenv(var) for var in env_vars):
-                available_providers.push({
+                available_providers.append({
                     "provider": provider,
                     "models": supported_models.get(provider, [])
                 })
         else:
             # For other providers, check single API key
             if os.getenv(env_vars):
-                available_providers.push({
+                available_providers.append({
                     "provider": provider,
                     "models": supported_models.get(provider, [])
                 })
-    
+
     return available_providers
 
 def create_frontend_router(build_dir="../frontend/dist"):

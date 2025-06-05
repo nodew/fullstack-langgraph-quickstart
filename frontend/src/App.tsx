@@ -1,9 +1,21 @@
 import { useStream } from "@langchain/langgraph-sdk/react";
 import type { Message } from "@langchain/langgraph-sdk";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, use } from "react";
 import { ProcessedEvent } from "@/components/ActivityTimeline";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ChatMessagesView } from "@/components/ChatMessagesView";
+
+type LlmProvider = {
+    provider: string;
+    model: [{
+        name: string;
+        displayName: string;
+    }];
+}
+
+const apiUrl = import.meta.env.DEV
+    ? "http://localhost:2024"
+    : "http://localhost:8123";
 
 export default function App() {
   const [processedEventsTimeline, setProcessedEventsTimeline] = useState<
@@ -19,11 +31,10 @@ export default function App() {
     messages: Message[];
     initial_search_query_count: number;
     max_research_loops: number;
+    provider: string;
     reasoning_model: string;
   }>({
-    apiUrl: import.meta.env.DEV
-      ? "http://localhost:2024"
-      : "http://localhost:8123",
+    apiUrl: apiUrl,
     assistantId: "agent",
     messagesKey: "messages",
     onFinish: (event: any) => {
@@ -103,7 +114,7 @@ export default function App() {
   }, [thread.messages, thread.isLoading, processedEventsTimeline]);
 
   const handleSubmit = useCallback(
-    (submittedInputValue: string, effort: string, model: string) => {
+    (submittedInputValue: string, effort: string, provider: string, model: string) => {
       if (!submittedInputValue.trim()) return;
       setProcessedEventsTimeline([]);
       hasFinalizeEventOccurredRef.current = false;
@@ -141,6 +152,7 @@ export default function App() {
         messages: newMessages,
         initial_search_query_count: initial_search_query_count,
         max_research_loops: max_research_loops,
+        provider: provider,
         reasoning_model: model,
       });
     },

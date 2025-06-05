@@ -8,45 +8,17 @@ from langchain_core.runnables import RunnableConfig
 class Configuration(BaseModel):
     """The configuration for the agent."""
 
-    query_generator_model: str = Field(
-        default="gemini-2.0-flash",
+    provider: Literal["gemini", "openai", "azure_openai", "anthropic"] = Field(
+        default="gemini",
         metadata={
-            "description": "The name of the language model to use for the agent's query generation."
+            "description": "The provider for the agent's language models (gemini, openai, azure_openai, or anthropic)."
         },
     )
 
-    reflection_model: str = Field(
+    reasoning_model: str = Field(
         default="gemini-2.5-flash-preview-04-17",
         metadata={
-            "description": "The name of the language model to use for the agent's reflection."
-        },
-    )
-
-    answer_model: str = Field(
-        default="gemini-2.5-flash-preview-04-17",
-        metadata={
-            "description": "The name of the language model to use for the agent's answer."
-        },
-    )
-
-    query_generator_provider: Literal["gemini", "openai", "azure_openai", "anthropic"] = Field(
-        default="gemini",
-        metadata={
-            "description": "The provider for the query generator model (gemini, openai, azure_openai, or anthropic)."
-        },
-    )
-
-    reflection_provider: Literal["gemini", "openai", "azure_openai", "anthropic"] = Field(
-        default="gemini",
-        metadata={
-            "description": "The provider for the reflection model (gemini, openai, azure_openai, or anthropic)."
-        },
-    )
-
-    answer_provider: Literal["gemini", "openai", "azure_openai", "anthropic"] = Field(
-        default="gemini",
-        metadata={
-            "description": "The provider for the answer model (gemini, openai, azure_openai, or anthropic)."
+            "description": "The name of the language model to use for the agent's reasoning."
         },
     )
 
