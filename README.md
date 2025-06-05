@@ -8,10 +8,11 @@ This project demonstrates a fullstack application using a React frontend and a L
 
 - 💬 Fullstack application with a React frontend and LangGraph backend.
 - 🧠 Powered by a LangGraph agent for advanced research and conversational AI.
-- 🔍 Dynamic search query generation using Google Gemini models.
+- 🔍 Dynamic search query generation using multiple LLM providers (Gemini, OpenAI, Claude).
 - 🌐 Integrated web research via Google Search API.
 - 🤔 Reflective reasoning to identify knowledge gaps and refine searches.
 - 📄 Generates answers with citations from gathered sources.
+- ⚡ Multi-provider support for cost optimization and performance tuning.
 - 🔄 Hot-reloading for both frontend and backend development during development.
 
 ## Project Structure
@@ -61,6 +62,40 @@ This will run the backend and frontend development servers.    Open your browser
 
 _Alternatively, you can run the backend and frontend development servers separately. For the backend, open a terminal in the `backend/` directory and run `langgraph dev`. The backend API will be available at `http://127.0.0.1:2024`. It will also open a browser window to the LangGraph UI. For the frontend, open a terminal in the `frontend/` directory and run `npm run dev`. The frontend will be available at `http://localhost:5173`._
 
+## Multi-Provider Support
+
+This application now supports multiple LLM providers for enhanced flexibility and cost optimization:
+
+### Supported Providers
+- **Google Gemini** (default): `gemini-2.0-flash`, `gemini-2.5-flash-preview-04-17`, `gemini-2.5-pro-preview-05-06`
+- **OpenAI**: `gpt-4o`, `gpt-4o-mini`, `gpt-3.5-turbo`
+- **Azure OpenAI**: `gpt-4o`, `gpt-4o-mini`, `gpt-35-turbo` (using your Azure deployments)
+- **Anthropic Claude**: `claude-3-5-sonnet-20241022`, `claude-3-5-haiku-20241022`
+
+### Configuration
+Add API keys to your `.env` file:
+```env
+GEMINI_API_KEY=your_gemini_key     # Optional
+OPENAI_API_KEY=your_openai_key     # Optional
+ANTHROPIC_API_KEY=your_claude_key  # Optional
+
+# Azure OpenAI (Optional)
+AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
+AZURE_OPENAI_API_KEY=your_azure_openai_key
+AZURE_OPENAI_API_VERSION=2024-02-01
+```
+
+You can configure different providers for each step of the research process. For detailed setup instructions and configuration examples, see [`backend/MULTI_PROVIDER_SETUP.md`](backend/MULTI_PROVIDER_SETUP.md).
+
+For Azure OpenAI specific setup, see [`backend/AZURE_OPENAI_SETUP.md`](backend/AZURE_OPENAI_SETUP.md).
+
+### Quick Test
+Run the multi-provider test script:
+```bash
+cd backend
+python test_multi_provider.py
+```
+
 ## How the Backend Agent Works (High-Level)
 
 The core of the backend is a LangGraph agent defined in `backend/src/agent/graph.py`. It follows these steps:
@@ -101,8 +136,10 @@ Open your browser and navigate to `http://localhost:8123/app/` to see the applic
 - [Tailwind CSS](https://tailwindcss.com/) - For styling.
 - [Shadcn UI](https://ui.shadcn.com/) - For components.
 - [LangGraph](https://github.com/langchain-ai/langgraph) - For building the backend research agent.
-- [Google Gemini](https://ai.google.dev/models/gemini) - LLM for query generation, reflection, and answer synthesis.
+- [Google Gemini](https://ai.google.dev/models/gemini) - Default LLM provider and required for Google Search.
+- [OpenAI](https://openai.com/) - Optional LLM provider for query generation, reflection, and answer synthesis.
+- [Anthropic Claude](https://anthropic.com/) - Optional LLM provider for query generation, reflection, and answer synthesis.
 
 ## License
 
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details. 
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.

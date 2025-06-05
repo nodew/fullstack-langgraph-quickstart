@@ -1,6 +1,6 @@
 import os
 from pydantic import BaseModel, Field
-from typing import Any, Optional
+from typing import Any, Optional, Literal
 
 from langchain_core.runnables import RunnableConfig
 
@@ -8,24 +8,17 @@ from langchain_core.runnables import RunnableConfig
 class Configuration(BaseModel):
     """The configuration for the agent."""
 
-    query_generator_model: str = Field(
-        default="gemini-2.0-flash",
+    provider: Literal["gemini", "openai", "azure_openai", "anthropic"] = Field(
+        default="gemini",
         metadata={
-            "description": "The name of the language model to use for the agent's query generation."
+            "description": "The provider for the agent's language models (gemini, openai, azure_openai, or anthropic)."
         },
     )
 
-    reflection_model: str = Field(
+    reasoning_model: str = Field(
         default="gemini-2.5-flash-preview-04-17",
         metadata={
-            "description": "The name of the language model to use for the agent's reflection."
-        },
-    )
-
-    answer_model: str = Field(
-        default="gemini-2.5-pro-preview-05-06",
-        metadata={
-            "description": "The name of the language model to use for the agent's answer."
+            "description": "The name of the language model to use for the agent's reasoning."
         },
     )
 

@@ -94,3 +94,19 @@ User Context:
 
 Summaries:
 {summaries}"""
+
+generic_web_search_instructions = """You are conducting web research on the following query: "{search_query}"
+
+Based on the search results provided below, synthesize a comprehensive and accurate summary that directly addresses the search query. 
+
+Instructions:
+- Focus on the most relevant and recent information from the search results
+- Maintain factual accuracy and only include information that can be verified from the sources
+- Present the information in a clear, well-structured manner
+- Avoid speculation or adding information not present in the search results
+- When mentioning specific facts, numbers, or claims, try to reference the source
+
+Search Results:
+{search_results}
+
+Please provide a well-organized summary based on these search results."""
