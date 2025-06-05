@@ -1,6 +1,10 @@
-# Gemini Fullstack LangGraph Quickstart
+# Fullstack LangGraph Quickstart - Multi-Provider Edition
 
-This project demonstrates a fullstack application using a React frontend and a LangGraph-powered backend agent. The agent is designed to perform comprehensive research on a user's query by dynamically generating search terms, querying the web using Google Search, reflecting on the results to identify knowledge gaps, and iteratively refining its search until it can provide a well-supported answer with citations. This application serves as an example of building research-augmented conversational AI using LangGraph and Google's Gemini models.
+**🚀 Enhanced fork of [gemini-general-llm-providers](https://github.com/original-repo/gemini-general-llm-providers) with expanded LLM provider support**
+
+This project demonstrates a fullstack application using a React frontend and a LangGraph-powered backend agent. Originally designed for Google's Gemini models, this fork has been enhanced to support **multiple LLM providers** including OpenAI, Anthropic Claude, and Azure OpenAI. The agent performs comprehensive research on user queries by dynamically generating search terms, querying the web, reflecting on results to identify knowledge gaps, and iteratively refining searches until it can provide well-supported answers with citations.
+
+**Key Enhancement:** While the original project was limited to Gemini models, this fork enables you to use any combination of supported LLM providers for different stages of the research process, providing flexibility in cost optimization and performance tuning.
 
 ![Gemini Fullstack LangGraph](./app.png)
 
@@ -30,10 +34,15 @@ Follow these steps to get the application running locally for development and te
 
 -   Node.js and npm (or yarn/pnpm)
 -   Python 3.8+
--   **`GEMINI_API_KEY`**: The backend agent requires a Google Gemini API key.
+-   **API Keys**: At least one LLM provider API key is required. Choose from:
+    - **`GEMINI_API_KEY`** (recommended for web search functionality)
+    - **`OPENAI_API_KEY`** for OpenAI models
+    - **`ANTHROPIC_API_KEY`** for Claude models
+    - **Azure OpenAI** credentials (see Multi-Provider Support section)
+
     1.  Navigate to the `backend/` directory.
     2.  Create a file named `.env` by copying the `backend/.env.example` file.
-    3.  Open the `.env` file and add your Gemini API key: `GEMINI_API_KEY="YOUR_ACTUAL_API_KEY"`
+    3.  Open the `.env` file and add your API key(s). For example: `GEMINI_API_KEY="YOUR_ACTUAL_API_KEY"`
 
 **2. Install Dependencies:**
 
