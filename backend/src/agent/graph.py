@@ -99,7 +99,7 @@ def continue_to_web_research(state: QueryGenerationState):
     ]
 
 
-def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
+async def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
     """LangGraph node that performs web research using hybrid approach.
 
     Uses Google's native search API with grounding metadata when GEMINI_API_KEY is available,
@@ -165,7 +165,7 @@ def web_research(state: WebSearchState, config: RunnableConfig) -> OverallState:
     )
 
     # Perform web search with the generic approach
-    search_results = perform_web_search_with_llm(
+    search_results = await perform_web_search_with_llm(
         search_query=state["search_query"],
         llm=llm,
         search_prompt_template=generic_web_search_instructions,

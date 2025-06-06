@@ -5,6 +5,7 @@ from typing import Any, Dict
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI, AzureChatOpenAI
 from langchain_anthropic import ChatAnthropic
+from langchain_ollama import ChatOllama
 
 
 def get_llm(model_name: str, provider: str, **kwargs) -> Any:
@@ -13,7 +14,7 @@ def get_llm(model_name: str, provider: str, **kwargs) -> Any:
 
     Args:
         model_name: The name of the model to use
-        provider: The provider ('gemini', 'openai', or 'anthropic')
+        provider: The provider ('gemini', 'openai', 'azure_openai', 'anthropic', or 'ollama')
         **kwargs: Additional arguments to pass to the LLM constructor
 
     Returns:
@@ -74,8 +75,19 @@ def get_llm(model_name: str, provider: str, **kwargs) -> Any:
             **kwargs
         )
 
+    elif provider == "ollama":
+        # Ollama typically runs locally and doesn't require an API key
+        # Get the base URL from environment variable, default to localhost
+        base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        
+        return ChatOllama(
+            model=model_name,
+            base_url=base_url,
+            **kwargs
+        )
+
     else:
-        raise ValueError(f"Unsupported provider: {provider}. Supported providers: gemini, openai, azure_openai, anthropic")
+        raise ValueError(f"Unsupported provider: {provider}. Supported providers: gemini, openai, azure_openai, anthropic, ollama")
 
 
 def get_supported_models() -> Dict[str, list]:
@@ -129,5 +141,15 @@ def get_supported_models() -> Dict[str, list]:
                 "name": "gpt-4",
                 "displayName": "GPT-4",
             },
+        ],
+        "ollama": [
+            {
+                "name": "deepseek-r1:14b",
+                "displayName": "Deepseek R1 14B",
+            },
+            {
+                "name": "qwen3:14b",
+                "displayName": "Qwen 3 14B",
+            }
         ]
     }
