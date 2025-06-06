@@ -9,18 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-type LlmProvider = {
-  provider: string;
-  models: [{
-    name: string;
-    displayName: string;
-  }];
-}
-
-const apiUrl = import.meta.env.DEV
-  ? "http://localhost:2024"
-  : "http://localhost:8123";
+import { useLlmContext } from "@/contexts/LlmContext";
 
 // Updated InputFormProps
 interface InputFormProps {
@@ -37,51 +26,17 @@ export const InputForm: React.FC<InputFormProps> = ({
   hasHistory,
 }) => {
   const [internalInputValue, setInternalInputValue] = useState("");
-  const [llmProviders, setLlmProviders] = useState<LlmProvider[]>([]);
-  const [effort, setEffort] = useState("medium");
-  const [provider, setProvider] = useState("gemini");
-  const [model, setModel] = useState("gemini-2.5-flash-preview-04-17");
+  const { 
+    effort,
+    provider,
+    model,
+    llmProviders,
+    updateEffort,
+    updateProvider,
+    updateModel
+  } = useLlmContext();
 
   const currentModels = llmProviders.find((p) => p.provider === provider)?.models || [];
-
-  useEffect(() => {
-    const fetchLlmProviders = async () => {
-      try {
-        const response = await fetch(`${apiUrl}/api/providers`);
-        if (!response.ok) {
-        throw new Error("Failed to fetch LLM providers");
-        }
-        const data: LlmProvider[] = await response.json();
-        setLlmProviders(data);
-      } catch (error) {
-        console.error("Error fetching LLM providers:", error);
-      }
-    };
-
-    fetchLlmProviders();
-  }, []);
-
-  useEffect(() => {
-    // Set default provider and model based on fetched providers
-    if (llmProviders.length > 0) {
-      const defaultProvider = llmProviders[0].provider;
-      setProvider(defaultProvider);
-      const defaultModel = llmProviders[0].models[0]?.name || "";
-      setModel(defaultModel);
-    }
-  }, [llmProviders]);
-
-  useEffect(() => {
-    // Reset model when provider changes
-    if (llmProviders.length > 0) {
-      const newModels = llmProviders.find((p) => p.provider === provider)?.models || [];
-      if (newModels.length > 0) {
-        setModel(newModels[0]!.name);
-      } else {
-        setModel("");
-      }
-    }
-  }, [provider]);
 
   const handleInternalSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -155,7 +110,7 @@ export const InputForm: React.FC<InputFormProps> = ({
               <Brain className="h-4 w-4 mr-2" />
               Effort
             </div>
-            <Select value={effort} onValueChange={setEffort}>
+            <Select value={effort} onValueChange={updateEffort}>
               <SelectTrigger className="w-[120px] bg-transparent border-none cursor-pointer">
                 <SelectValue placeholder="Effort" />
               </SelectTrigger>
@@ -186,7 +141,7 @@ export const InputForm: React.FC<InputFormProps> = ({
               <Grid className="h-4 w-4 mr-2" />
               Provider
             </div>
-            <Select value={provider} onValueChange={setProvider}>
+            <Select value={provider} onValueChange={updateProvider}>
               <SelectTrigger className="w-[150px] bg-transparent border-none cursor-pointer">
                 <SelectValue placeholder="Model" />
               </SelectTrigger>
@@ -211,7 +166,7 @@ export const InputForm: React.FC<InputFormProps> = ({
               <Cpu className="h-4 w-4 mr-2" />
               Model
             </div>
-            <Select value={model} onValueChange={setModel}>
+            <Select value={model} onValueChange={updateModel}>
               <SelectTrigger className="w-[150px] bg-transparent border-none cursor-pointer">
                 <SelectValue placeholder="Model" />
               </SelectTrigger>
