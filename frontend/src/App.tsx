@@ -5,14 +5,6 @@ import { ProcessedEvent } from "@/components/ActivityTimeline";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { ChatMessagesView } from "@/components/ChatMessagesView";
 
-type LlmProvider = {
-    provider: string;
-    model: [{
-        name: string;
-        displayName: string;
-    }];
-}
-
 const apiUrl = import.meta.env.DEV
     ? "http://localhost:2024"
     : "http://localhost:8123";
