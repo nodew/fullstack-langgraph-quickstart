@@ -8,10 +8,10 @@ from langchain_core.runnables import RunnableConfig
 class Configuration(BaseModel):
     """The configuration for the agent."""
 
-    provider: Literal["gemini", "openai", "azure_openai", "anthropic"] = Field(
+    provider: Literal["gemini", "openai", "azure_openai", "anthropic", "ollama"] = Field(
         default="gemini",
         metadata={
-            "description": "The provider for the agent's language models (gemini, openai, azure_openai, or anthropic)."
+            "description": "The provider for the agent's language models (gemini, openai, azure_openai, anthropic, or ollama)."
         },
     )
 

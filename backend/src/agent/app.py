@@ -1,6 +1,8 @@
 # mypy: disable - error - code = "no-untyped-def,misc"
 import pathlib
 import os
+import aiohttp
+import asyncio
 from fastapi import FastAPI, Request, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
@@ -43,6 +45,21 @@ async def get_available_models() -> List[Dict[str, Any]]:
                     "provider": provider,
                     "models": supported_models.get(provider, [])
                 })
+
+    # Check if Ollama is available by trying to connect to it
+    ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    try:
+        timeout = aiohttp.ClientTimeout(total=5)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.get(f"{ollama_base_url}/api/tags") as response:
+                if response.status == 200:
+                    available_providers.append({
+                        "provider": "ollama",
+                        "models": supported_models.get("ollama", [])
+                    })
+    except (aiohttp.ClientError, asyncio.TimeoutError):
+        # Ollama is not accessible, skip it
+        pass
 
     return available_providers
 

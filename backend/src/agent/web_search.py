@@ -1,7 +1,8 @@
 """Generic web search utilities that work with any LLM provider."""
 
 import re
-import requests
+import aiohttp
+import asyncio
 from typing import List, Dict, Any, Optional
 from urllib.parse import urlparse, urljoin
 from bs4 import BeautifulSoup
@@ -31,12 +32,11 @@ class GenericWebSearcher:
     def __init__(self, max_results: int = 5, max_content_length: int = 2000):
         self.max_results = max_results
         self.max_content_length = max_content_length
-        self.session = requests.Session()
-        self.session.headers.update({
+        self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-        })
+        }
     
-    def search(self, query: str) -> List[WebSearchResult]:
+    async def search(self, query: str) -> List[WebSearchResult]:
         """
         Perform a web search using DuckDuckGo and return results with content.
         
@@ -47,72 +47,78 @@ class GenericWebSearcher:
             List of WebSearchResult objects
         """
         try:
-            with DDGS() as ddgs:
-                search_results = list(ddgs.text(query, max_results=self.max_results))
+            # DuckDuckGo search is synchronous, so we'll run it in a thread
+            search_results = await asyncio.to_thread(
+                lambda: list(DDGS().text(query, max_results=self.max_results))
+            )
             
             results = []
+            # Process content extraction concurrently
+            tasks = []
             for result in search_results:
-                # Extract basic information
                 title = result.get('title', '')
                 url = result.get('href', '')
                 snippet = result.get('body', '')
                 
-                # Try to fetch and extract content from the page
-                content = self._extract_content(url)
-                
-                web_result = WebSearchResult(
-                    title=title,
-                    url=url,
-                    snippet=snippet,
-                    content=content
-                )
-                results.append(web_result)
+                # Create a task for content extraction
+                task = self._extract_content_async(url, title, snippet)
+                tasks.append(task)
             
-            return results
+            # Wait for all content extraction tasks to complete
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Filter out exceptions and return valid results
+            valid_results = [r for r in results if isinstance(r, WebSearchResult)]
+            return valid_results
             
         except Exception as e:
             logger.error(f"Error performing web search: {e}")
             return []
     
-    def _extract_content(self, url: str) -> str:
+    async def _extract_content_async(self, url: str, title: str, snippet: str) -> WebSearchResult:
         """
-        Extract text content from a web page.
+        Extract text content from a web page asynchronously.
         
         Args:
             url: The URL to extract content from
+            title: The title of the search result
+            snippet: The snippet of the search result
             
         Returns:
-            Extracted text content, truncated if necessary
+            WebSearchResult with extracted content
         """
         try:
-            response = self.session.get(url, timeout=10)
-            response.raise_for_status()
-            
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Remove script and style elements
-            for script in soup(["script", "style"]):
-                script.decompose()
-            
-            # Get text content
-            text = soup.get_text()
-            
-            # Clean up whitespace
-            lines = (line.strip() for line in text.splitlines())
-            chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-            text = ' '.join(chunk for chunk in chunks if chunk)
-            
-            # Truncate if too long
-            if len(text) > self.max_content_length:
-                text = text[:self.max_content_length] + "..."
-            
-            return text
-            
+            timeout = aiohttp.ClientTimeout(total=10)
+            async with aiohttp.ClientSession(timeout=timeout, headers=self.headers) as session:
+                async with session.get(url) as response:
+                    response.raise_for_status()
+                    content_bytes = await response.read()
+                    
+                    soup = BeautifulSoup(content_bytes, 'html.parser')
+                    
+                    # Remove script and style elements
+                    for script in soup(["script", "style"]):
+                        script.decompose()
+                    
+                    # Get text content
+                    text = soup.get_text()
+                    
+                    # Clean up whitespace
+                    lines = (line.strip() for line in text.splitlines())
+                    chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+                    text = ' '.join(chunk for chunk in chunks if chunk)
+                    
+                    # Truncate if too long
+                    if len(text) > self.max_content_length:
+                        text = text[:self.max_content_length] + "..."
+                    
+                    return WebSearchResult(title=title, url=url, snippet=snippet, content=text)
+                    
         except Exception as e:
             logger.warning(f"Could not extract content from {url}: {e}")
-            return ""
+            return WebSearchResult(title=title, url=url, snippet=snippet, content="")
 
-def perform_web_search_with_llm(
+async def perform_web_search_with_llm(
     search_query: str,
     llm,
     search_prompt_template: str,
@@ -132,7 +138,7 @@ def perform_web_search_with_llm(
     """
     # Perform web search
     searcher = GenericWebSearcher(max_results=max_results)
-    search_results = searcher.search(search_query)
+    search_results = await searcher.search(search_query)
     
     if not search_results:
         return {
