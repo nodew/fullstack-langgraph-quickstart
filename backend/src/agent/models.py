@@ -79,7 +79,7 @@ def get_llm(model_name: str, provider: str, **kwargs) -> Any:
         # Ollama typically runs locally and doesn't require an API key
         # Get the base URL from environment variable, default to localhost
         base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        
+
         return ChatOllama(
             model=model_name,
             base_url=base_url,
@@ -144,12 +144,8 @@ def get_supported_models() -> Dict[str, list]:
         ],
         "ollama": [
             {
-                "name": "deepseek-r1:14b",
-                "displayName": "Deepseek R1 14B",
-            },
-            {
-                "name": "qwen3:14b",
-                "displayName": "Qwen 3 14B",
+                "name": "llama3.1:8b",
+                "displayName": "Llama 3.1 8b",
             }
         ]
     }
