@@ -51,7 +51,10 @@ Follow these steps to get the application running locally for development and te
 
 ```bash
 cd backend
-pip install .
+uv venv
+uv sync
+# OR
+uv pip install -e .
 ```
 
 **Frontend:**
@@ -81,6 +84,9 @@ This application now supports multiple LLM providers for enhanced flexibility an
 - **OpenAI**: `gpt-4o`, `gpt-4o-mini`, `gpt-3.5-turbo`
 - **Azure OpenAI**: `gpt-4o`, `gpt-4o-mini`, `gpt-35-turbo` (using your Azure deployments)
 - **Anthropic Claude**: `claude-3-5-sonnet-20241022`, `claude-3-5-haiku-20241022`
+- **Ollama**: `llama3.1:8b`
+
+To add more models, you can update the [models.py](./backend/src/agent/models.py). And please be aware, the model you added should support `structured output`.
 
 ### Configuration
 Add API keys to your `.env` file:
@@ -88,7 +94,7 @@ Add API keys to your `.env` file:
 GEMINI_API_KEY=your_gemini_key            # Optional
 OPENAI_API_KEY=your_openai_key            # Optional
 ANTHROPIC_API_KEY=your_claude_key         # Optional
-OLLAMA_BASE_URL=http://localhost:11434    #Optional
+OLLAMA_BASE_URL=http://localhost:11434    # Optional
 # Azure OpenAI (Optional)
 AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
 AZURE_OPENAI_API_KEY=your_azure_openai_key
@@ -139,6 +145,7 @@ Open your browser and navigate to `http://localhost:8123/app/` to see the applic
 - [OpenAI](https://openai.com/) - Optional LLM provider for query generation, reflection, and answer synthesis.
 - [Anthropic Claude](https://anthropic.com/) - Optional LLM provider for query generation, reflection, and answer synthesis.
 - [Ollama](https://ollama.com/) - Optional LLM provider for local development.
+
 ## License
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
