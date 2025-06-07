@@ -2,7 +2,7 @@
 
 **🚀 Enhanced fork of [gemini-general-llm-providers](https://github.com/original-repo/gemini-general-llm-providers) with expanded LLM provider support**
 
-This project demonstrates a fullstack application using a React frontend and a LangGraph-powered backend agent. Originally designed for Google's Gemini models, this fork has been enhanced to support **multiple LLM providers** including OpenAI, Anthropic Claude, and Azure OpenAI. The agent performs comprehensive research on user queries by dynamically generating search terms, querying the web, reflecting on results to identify knowledge gaps, and iteratively refining searches until it can provide well-supported answers with citations.
+This project demonstrates a fullstack application using a React frontend and a LangGraph-powered backend agent. Originally designed for Google's Gemini models, this fork has been enhanced to support **multiple LLM providers** including OpenAI, Anthropic Claude, Ollama, and Azure OpenAI. The agent performs comprehensive research on user queries by dynamically generating search terms, querying the web, reflecting on results to identify knowledge gaps, and iteratively refining searches until it can provide well-supported answers with citations.
 
 **Key Enhancement:** While the original project was limited to Gemini models, this fork enables you to use any combination of supported LLM providers for different stages of the research process, providing flexibility in cost optimization and performance tuning.
 
@@ -38,6 +38,7 @@ Follow these steps to get the application running locally for development and te
     - **`GEMINI_API_KEY`** (recommended for web search functionality)
     - **`OPENAI_API_KEY`** for OpenAI models
     - **`ANTHROPIC_API_KEY`** for Claude models
+    - **`OLLAMA_BASE_URL`** for Ollama models
     - **Azure OpenAI** credentials (see Multi-Provider Support section)
 
     1.  Navigate to the `backend/` directory.
@@ -84,25 +85,14 @@ This application now supports multiple LLM providers for enhanced flexibility an
 ### Configuration
 Add API keys to your `.env` file:
 ```env
-GEMINI_API_KEY=your_gemini_key     # Optional
-OPENAI_API_KEY=your_openai_key     # Optional
-ANTHROPIC_API_KEY=your_claude_key  # Optional
-
+GEMINI_API_KEY=your_gemini_key            # Optional
+OPENAI_API_KEY=your_openai_key            # Optional
+ANTHROPIC_API_KEY=your_claude_key         # Optional
+OLLAMA_BASE_URL=http://localhost:11434    #Optional
 # Azure OpenAI (Optional)
 AZURE_OPENAI_ENDPOINT=https://your-resource-name.openai.azure.com/
 AZURE_OPENAI_API_KEY=your_azure_openai_key
 AZURE_OPENAI_API_VERSION=2024-02-01
-```
-
-You can configure different providers for each step of the research process. For detailed setup instructions and configuration examples, see [`backend/MULTI_PROVIDER_SETUP.md`](backend/MULTI_PROVIDER_SETUP.md).
-
-For Azure OpenAI specific setup, see [`backend/AZURE_OPENAI_SETUP.md`](backend/AZURE_OPENAI_SETUP.md).
-
-### Quick Test
-Run the multi-provider test script:
-```bash
-cd backend
-python test_multi_provider.py
 ```
 
 ## How the Backend Agent Works (High-Level)
@@ -148,7 +138,7 @@ Open your browser and navigate to `http://localhost:8123/app/` to see the applic
 - [Google Gemini](https://ai.google.dev/models/gemini) - Default LLM provider and required for Google Search.
 - [OpenAI](https://openai.com/) - Optional LLM provider for query generation, reflection, and answer synthesis.
 - [Anthropic Claude](https://anthropic.com/) - Optional LLM provider for query generation, reflection, and answer synthesis.
-
+- [Ollama](https://ollama.com/) - Optional LLM provider for local development.
 ## License
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
